@@ -20,9 +20,10 @@ require "shellwords"
 
 require "yast"
 require "yast/logger"
+# memory size detection
 require "yast2/hw_detection"
 
-module Yast
+module Installation
   class InstsysCleaner
     extend Yast::Logger
 
@@ -32,14 +33,19 @@ module Yast
 
     # memory limit for removing the libzypp metadata cache (640MB)
     LIBZYPP_WATERLINE = 640 * (1 << 20)
+    # the cache in inst-sys, the target system cache is at /mnt/...,
+    # in upgrade mode the target cache is kept
     LIBZYPP_CACHE_PATH = "/var/cache/zypp/raw".freeze
 
+    # Remove some files in inst-sys to have more free space if the system
+    # has too low memory. If the system has enough memory keep everything in place.
     def self.make_clean
       Yast.import "Mode"
       Yast.import "Stage"
 
-      if !Stage.initial && (Mode.install || Mode.update)
-        log.warning("Skipping inst-sys cleanup (not in the initial installation)")
+      # just a sanity check to make sure it's not called in an unexpected situation
+      if !Stage.initial && (Mode.install || Mode.update || Mode.auto)
+        log.warning("Skipping inst-sys cleanup (not in installation/update)")
         return :auto
       end
 
