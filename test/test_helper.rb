@@ -58,4 +58,10 @@ RSpec.configure do |config|
   config.extend Yast::I18n  # available in context/describe
   config.include Yast::I18n # available in it/let/before/...
   config.include Helpers    # custom helpers
+
+  # Enable verifying doubles
+  # https://relishapp.com/rspec/rspec-mocks/v/3-0/docs/verifying-doubles/partial-doubles
+  config.mock_with :rspec do |c|
+    c.verify_partial_doubles = true
+  end
 end
